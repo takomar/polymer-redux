@@ -71,18 +71,6 @@
             }
             const store = Redux.createStore(reducer)
             const ReduxBehavior = PolymerRedux(store)
-
-            // selectors
-            const getBffs = state => state.bffs
-            const getFriends = state => state.friends
-            const friendsSelector = Reselect.createSelector(
-              getBffs, getFriends, (bffs, friends) => {
-                if (bffs) {
-                  return friends.filter(friend => friend.bff)
-                }
-                return friends
-              }
-            )
           </script>
 
           <!-- friends list module -->
@@ -90,7 +78,10 @@
             <template>
               <p>
                 <span>You have [[friends.length]] friend(s).</span>
-                <button on-click="toggleBffs">Show/Hide BFFs</button>
+                <label for="showBesties">
+                  <input id="showBesties" on-click="_toggleBesties" type="checkbox">
+                  <span>toggle besties</span>
+                </label>
                 <template is="dom-if" if="[[canSortFriends(friends.length)]]">
                   <button on-click="sortFriends">Sort Friends</button>
                 </template>
@@ -119,14 +110,13 @@
               is: 'friends-list',
               behaviors: [ ReduxBehavior ],
               properties: {
-                as: {
+                showBffs: {
                   type: Boolean
                 },
                 friends: {
                   type: Array,
                   statePath: function (state) { 
-                    console.log(this.as);
-                    return !!this.as ? state.friends.filter(friend => friend.bff === this.as) : []
+                    return this.showBffs !== undefined ? state.friends.filter(friend => friend.bff === this.showBffs) : []
                   }
                 }
               },
@@ -180,9 +170,10 @@
                 }
               },
               toggleBffs: function() {
-                this.as = true;
-                console.log('toggle' + this.as);
                 this.dispatch('toggleBff')
+              },
+              _toggleBesties: function() {
+                this.showBffs = !this.showBffs;
               }
             })
           </script>

@@ -11,6 +11,12 @@
     var twoWayWarning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
     var actionsWarning = 'Polymer Redux: <%s>.actions inaccessible property. "actions" is reserved for Action Creators.';
 
+    function compileProps(element) {
+	    return Object.keys(element.properties).reduce((props, name) => Object.assign(props, {
+	        [name]: element[name],
+	    }), {});
+    }
+    
     /**
      * Returns property bindings found on a given Element/Behavior.
      *
@@ -90,7 +96,8 @@
                 // statePath, a path or function.
                 var path = property.path;
                 if (typeof path == 'function') {
-                    value = path.call(element, state);
+                    const props1 = compileProps(element);
+                    value = path.call(element, state, props1);
                 } else {
                     value = Polymer.Base.get(path, state);
                 }
