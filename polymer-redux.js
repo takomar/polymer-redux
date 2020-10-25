@@ -232,18 +232,38 @@
         // middleware, make sure we pass the polymer-redux dispatch
         // so we have access to the elements action creators
         if (typeof action === 'function') {
-            return store.dispatch(function() {
+            debugger;
+            
+            const callback = function() {
                 var argv = castArgumentsToArray(arguments);
                 // replace redux dispatch
                 argv.splice(0, 1, function() {
                     return dispatchReduxAction(element, store, arguments);
                 });
                 return action.apply(element, argv);
-            });
+            };
+
+            Object.getOwnPropertyNames(action)
+                .filter(prop => !Object.getOwnPropertyNames(callback).includes(prop))
+                .forEach(prop => Object.defineProperty(callback, prop, {
+                value: action[prop],
+                writable: false
+              }));
+            
+            return store.dispatch(callback);
         }
 
         // action
         return store.dispatch(action);
+    }
+
+    function actionCallbackFunction(element, store, action) {
+        var argv = castArgumentsToArray(arguments);
+        // replace redux dispatch
+        argv.splice(0, 1, function() {
+            return dispatchReduxAction(element, store, arguments);
+        });
+        return action.apply(element, argv);
     }
 
     /**

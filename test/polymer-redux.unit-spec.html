@@ -256,6 +256,19 @@
                                 this.store.dispatch = storeDispatch;
                             });
 
+                            it('should call middleware with added properties with polymer-redux dispatch', function() {
+                                const customCallback = function(dispatch) {};
+                                customCallback  ['custom_name'] = 'mockAction'
+                                var middleware = sinon.spy(customCallback);
+
+                                this.store.resetStub();
+                                this.behavior.dispatch(middleware);
+
+                                var fn = this.store.dispatch.getCall(0).args[0];
+                                assert.strictEqual(fn['name'], "callback");
+                                assert.strictEqual(fn['custom_name'], "mockAction");
+                            });
+
                             it('should dispatch actions from middleware', function() {
                                 var action = {};
                                 var middleware = sinon.spy(function(dispatch) {
